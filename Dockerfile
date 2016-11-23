@@ -45,6 +45,7 @@ RUN echo "deb http://download.mono-project.com/repo/debian wheezy-libjpeg62-comp
 RUN apt-get update
 RUN apt-get install mono-complete -y 
 
+
 # Install Jenkins
 RUN apt-get update && apt-get install -y git curl && rm -rf /var/lib/apt/lists/*
 
@@ -55,6 +56,12 @@ ARG user=jenkins
 ARG group=jenkins
 ARG uid=1000
 ARG gid=1000
+
+
+#add nuget for mono 
+RUN mkdir .nuget
+ADD https://dist.nuget.org/win-x86-commandline/latest/nuget.exe ./nuget.exe
+
 
 # Jenkins is run with user `jenkins`, uid = 1000
 # If you bind mount a volume from the host or a data container, 
