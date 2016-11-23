@@ -30,8 +30,8 @@ RUN echo "deb [arch=amd64] http://llvm.org/apt/jessie/ llvm-toolchain-jessie-3.6
 
 # Install .NET Core SDK
 
-ENV DOTNETCORE_VERSION 1.0.0-preview2
-RUN curl -sSL https://go.microsoft.com/fwlink/?LinkID=827530 --output dotnet.tar.gz \
+ENV DOTNETCORE_VERSION 1.1.0
+RUN curl -sSL https://go.microsoft.com/fwlink/?LinkID=835021 --output dotnet.tar.gz \
     && mkdir -p /opt/dotnet \
     && tar -zxf dotnet.tar.gz -C /opt/dotnet \
     && rm dotnet.tar.gz \
