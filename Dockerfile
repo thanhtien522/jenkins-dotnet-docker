@@ -28,14 +28,38 @@ RUN echo "deb [arch=amd64] http://llvm.org/apt/jessie/ llvm-toolchain-jessie-3.6
         gettext \
     && rm -rf /var/lib/apt/lists/*
 
-# Install .NET Core SDK
+# Install .NET Core
+ENV DOTNET_VERSION 1.1.0
+ENV DOTNET_DOWNLOAD_URL https://dotnetcli.blob.core.windows.net/dotnet/release/1.1.0/Binaries/$DOTNET_VERSION/dotnet-debian-x64.$DOTNET_VERSION.tar.gz
 
-ENV DOTNETCORE_VERSION 1.1.0
-RUN curl -sSL https://go.microsoft.com/fwlink/?LinkID=835021 --output dotnet.tar.gz \
-    && mkdir -p /opt/dotnet \
-    && tar -zxf dotnet.tar.gz -C /opt/dotnet \
+RUN curl -SL $DOTNET_DOWNLOAD_URL --output dotnet.tar.gz \
+    && mkdir -p /usr/share/dotnet \
+    && tar -zxf dotnet.tar.gz -C /usr/share/dotnet \
     && rm dotnet.tar.gz \
-    && ln -s /opt/dotnet/dotnet /usr/local/bin
+    && ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet
+
+# Install .NET Core SDK
+ENV DOTNET_SDK_VERSION 1.0.0-preview3-004056
+ENV DOTNET_SDK_DOWNLOAD_URL https://dotnetcli.blob.core.windows.net/dotnet/Sdk/$DOTNET_SDK_VERSION/dotnet-dev-debian-x64.$DOTNET_SDK_VERSION.tar.gz
+
+RUN curl -SL $DOTNET_SDK_DOWNLOAD_URL --output dotnet.tar.gz \
+    && tar -zxf dotnet.tar.gz -C /usr/share/dotnet \
+    && rm dotnet.tar.gz
+
+# Trigger the population of the local package cache
+ENV NUGET_XMLDOC_MODE skip
+ENV DOTNET_SKIP_FIRST_TIME_EXPERIENCE true
+RUN mkdir warmup \
+    && cd warmup \
+    && dotnet new \
+    # Projects created with .NET Core SDK preview3 target 1.0, replace with 1.1 to populate cache
+    && sed -i "s/1.0.1/1.1.0/;s/netcoreapp1.0/netcoreapp1.1/" ./warmup.csproj \
+    && dotnet restore \
+    && cd .. \
+    && rm -rf warmup \
+    && rm -rf /tmp/NuGetScratch
+    
+
 #Install Mono
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
 RUN echo "deb http://download.mono-project.com/repo/debian wheezy main" |  tee /etc/apt/sources.list.d/mono-xamarin.list 
