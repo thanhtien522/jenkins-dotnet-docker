@@ -45,7 +45,7 @@ ENV DOTNET_SDK_DOWNLOAD_URL https://dotnetcli.blob.core.windows.net/dotnet/previ
 RUN curl -SL $DOTNET_SDK_DOWNLOAD_URL --output dotnet.tar.gz \
     && mkdir -p /usr/share/dotnet \
     && tar -zxf dotnet.tar.gz -C /usr/share/dotnet \
-    && rm dotnet.tar.gz 
+    && rm dotnet.tar.gz
 
 # Trigger the population of the local package cache
 ENV NUGET_XMLDOC_MODE skip
