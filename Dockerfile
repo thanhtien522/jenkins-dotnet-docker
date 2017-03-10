@@ -16,6 +16,7 @@ RUN echo "deb [arch=amd64] http://llvm.org/apt/jessie/ llvm-toolchain-jessie-3.6
         libc6 \
         libcurl3 \
         libgcc1 \
+        libgssapi-krb5-2 \
         libicu52 \
         liblldb-3.6 \
         liblttng-ust0 \
@@ -29,7 +30,7 @@ RUN echo "deb [arch=amd64] http://llvm.org/apt/jessie/ llvm-toolchain-jessie-3.6
     && rm -rf /var/lib/apt/lists/*
 
 # Install .NET Core
-ENV DOTNET_VERSION 1.0.3
+ENV DOTNET_VERSION 1.0.4
 ENV DOTNET_DOWNLOAD_URL https://dotnetcli.blob.core.windows.net/dotnet/preview/Binaries/$DOTNET_VERSION/dotnet-debian-x64.$DOTNET_VERSION.tar.gz
 
 RUN curl -SL $DOTNET_DOWNLOAD_URL --output dotnet.tar.gz \
@@ -38,14 +39,15 @@ RUN curl -SL $DOTNET_DOWNLOAD_URL --output dotnet.tar.gz \
     && rm dotnet.tar.gz \
     && ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet
 
-# Install .NET Core SDK
-ENV DOTNET_SDK_VERSION 1.0.0-preview2-003156
-ENV DOTNET_SDK_DOWNLOAD_URL https://dotnetcli.blob.core.windows.net/dotnet/preview/Binaries/$DOTNET_SDK_VERSION/dotnet-dev-debian-x64.$DOTNET_SDK_VERSION.tar.gz
+#Install .NET Core SDK
+ENV DOTNET_SDK_VERSION 1.0.1
+ENV DOTNET_SDK_DOWNLOAD_URL https://dotnetcli.blob.core.windows.net/dotnet/Sdk/$DOTNET_SDK_VERSION/dotnet-dev-debian-x64.$DOTNET_SDK_VERSION.tar.gz
 
 RUN curl -SL $DOTNET_SDK_DOWNLOAD_URL --output dotnet.tar.gz \
     && mkdir -p /usr/share/dotnet \
     && tar -zxf dotnet.tar.gz -C /usr/share/dotnet \
-    && rm dotnet.tar.gz
+    && rm dotnet.tar.gz \
+    && ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet
 
 # Trigger the population of the local package cache
 ENV NUGET_XMLDOC_MODE skip
@@ -96,8 +98,8 @@ VOLUME /var/jenkins_home
 # or config file with your custom jenkins Docker image.
 RUN mkdir -p /usr/share/jenkins/ref/init.groovy.d
 
-ENV TINI_VERSION 0.13.1
-ENV TINI_SHA 0f78709a0e3c80e7c9119fdc32c2bc0f4cfc4cab
+ENV TINI_VERSION 0.13.2
+ENV TINI_SHA afbf8de8a63ce8e4f18cb3f34dfdbbd354af68a1
 
 # Use tini as subreaper in Docker container to adopt zombie processes 
 RUN curl -fsSL https://github.com/krallin/tini/releases/download/v${TINI_VERSION}/tini-static-amd64 -o /bin/tini && chmod +x /bin/tini \
@@ -107,10 +109,10 @@ COPY init.groovy /usr/share/jenkins/ref/init.groovy.d/tcp-slave-agent-port.groov
 
 # jenkins version being bundled in this docker image
 ARG JENKINS_VERSION
-ENV JENKINS_VERSION ${JENKINS_VERSION:-2.32.1}
+ENV JENKINS_VERSION ${JENKINS_VERSION:-2.32.3}
 
 # jenkins.war checksum, download will be validated using it
-ARG JENKINS_SHA=1b65dc498ba7ab1f5cce64200b920a8716d90834
+ARG JENKINS_SHA=a25b9a314ca9e76f9673da7309e1882e32674223
 
 # Can be used to customize where jenkins.war get downloaded from
 ARG JENKINS_URL=https://repo.jenkins-ci.org/public/org/jenkins-ci/main/jenkins-war/${JENKINS_VERSION}/jenkins-war-${JENKINS_VERSION}.war
